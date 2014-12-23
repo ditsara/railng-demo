@@ -1,0 +1,50 @@
+
+<div class="container" ng-controller="PostsController">
+
+  <h1>posts#index</h1>
+
+  <table class="table">
+    <tr>
+      <th>id</th>
+      <th>title</th>
+      <th>body</th>
+    </tr>
+
+    <tr
+     ng-repeat="post in posts"
+     ng-mouseenter="editing = true"
+     ng-mouseleave="editing = false" >
+
+      <td>{{post.id}}</td>
+      <td>
+        <span ng-hide="editing">{{post.title}}</span>
+        <span ng-show="editing">
+          <input type="text" class="form-control" ng-model="post.title" />
+        </span>
+      </td>
+      <td>
+        <span ng-hide="editing">{{post.body}}</span>
+        <span ng-show="editing">
+          <input type="text" class="form-control" ng-model="post.body" />
+        </span>
+      </td>
+
+    </tr>
+
+  </table>
+  <p>
+    <a href='#' ng-click="add()">Add</a>
+  </p>
+
+  <hr />
+
+  <p>
+    Changed: {{changed}}
+  </p>
+  <p>
+    <span ng-show="changed">
+      <a href='#' ng-click="save()">Save</a>
+    </span>
+  </p>
+
+</div>
