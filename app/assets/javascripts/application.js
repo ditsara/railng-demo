@@ -17,4 +17,11 @@
 //= require_self
 //= require_tree .
 
-angular.module('sandbox', ['ngResource']);
+angular.module('sandbox', ['ngResource'])
+
+// Config
+.config(['$httpProvider', function($httpProvider) {
+  // include the CSRF token with AJAX requests
+  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content');
+}
+])

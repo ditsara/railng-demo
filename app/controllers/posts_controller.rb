@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   def index
-    @posts = js_bind(Post.all, :posts, url: posts_url)
+    @posts = js_bind(Post.all, :posts, url: posts_url(format: :json))
   end
 
   ## All routes except index are JSON only
