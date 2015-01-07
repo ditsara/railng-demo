@@ -27,21 +27,39 @@ angular.module('sandbox')
 .factory('RailsData', [ '$resource', function ($resource) {
   var railsData = {};
 
+  // generate a $resource if the obj has a url
+  function toResource(railsObj) {
+
+    if (railsObj instanceof Array) {
+      // recursion
+      return railsObj.map(
+        function(currentValue, index, array) {
+          return toResource(currentValue);
+      });
+    }
+
+    if (typeof(railsObj.url) == 'undefined') {
+      return railsObj;
+    } else {
+      // has a URL; generate a $resource object
+      var resourceObj = $resource(railsObj.url);
+      return new resourceObj(railsObj);
+    }
+  }
+
+  var MD5 = new Hashes.MD5;
+
   var init = function() {
     angular.forEach(railsBindings, function(value, key) {
       railsData[key] = {
-        data: angular.copy(value.data),
-        original: value.data,
-        changed: function() {
-          return !angular.equals(railsData[key].data, railsData[key].original);
-        },
-        save: function() {
-          console.log('This would save to ' + value.url);
-          // we would want to actually call either $http on the
-          // provided URL, or maybe setup $resource
+        data: toResource(value.data),
 
-          // we would also want to check for the presence of url data
-          // before generating this function
+        // stores the MD5 hash of the obj to detect changes later
+        original: MD5.hex( JSON.stringify( toResource(value.data) ) ),
+
+        // compares current obj with the MD5 hash
+        changed: function() {
+          return !( MD5.hex(JSON.stringify(railsData[key].data)) === railsData[key].original );
         }
 
         // we could generate other functions based on options pushed

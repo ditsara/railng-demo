@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require angular
 //= require angular-resource
+//= require jshashes
 //= require_self
 //= require_tree .
 
