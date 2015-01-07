@@ -24,7 +24,7 @@ function ($scope, RailsData) {
 }]);
 
 angular.module('sandbox')
-.factory('RailsData', [ function () {
+.factory('RailsData', [ '$resource', function ($resource) {
   var railsData = {};
 
   var init = function() {

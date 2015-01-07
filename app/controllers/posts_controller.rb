@@ -1,11 +1,17 @@
 class PostsController < ApplicationController
+  respond_to :html, :json
+
   def index
     @posts = js_bind(Post.all, :posts, url: posts_url(format: :json))
+    @test = js_bind(Post.first, :test)
+
+    respond_with(@posts)
   end
 
   ## All routes except index are JSON only
   def show
     @post = Post.find(params[:id])
+    respond_with(@post)
   end
 
   # accepts mass create/update as well as individual create
