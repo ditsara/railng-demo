@@ -28,7 +28,20 @@ angular.module('sandbox')
   var railsData = {};
   var MD5 = new Hashes.MD5;
 
-  function withoutAttached(obj) { return _.omit(obj, '_orig', '_changed'); }
+  function withoutAttached(obj) { return _.omit(obj, '_orig', '_changed', '_update'); }
+
+  // adds a hash for change detection
+  var attachChangeDetection = function (obj) {
+    obj['_orig'] = MD5.hex(JSON.stringify(obj));
+    obj['_changed'] = function (){ return changed(obj) };
+    obj['_update'] = function () {
+      obj.$update(function(val,hdrs) {
+        attachChangeDetection(obj);
+      });
+    };
+    // just an alias for now
+    obj['_delete'] = function () { obj.$delete(); };
+  }
 
   // detects changes by comparing MD5 hashes
   var changed = function(obj) {
@@ -43,8 +56,7 @@ angular.module('sandbox')
     }
   }
 
-  // adds a hash for change detection, and generates an
-  // AngularJS $resource instance if the obj has a 'url' property
+  // generates an AngularJS $resource instance if the obj has a 'url' property
   // when called with an array, simply return an array with
   // toResource called on each array member
   function toResource(railsObj) {
@@ -63,13 +75,14 @@ angular.module('sandbox')
       resourcedObj = railsObj
     } else {
       // has a URL; generate a $resource object then attach the hash
-      var resourceKlass = $resource(railsObj.url);
+      var resourceKlass = $resource(railsObj.url, null, {
+        'update': { method: 'PUT' }
+      });
       resourcedObj = new resourceKlass(railsObj);
     }
 
-    // generate and attach the hash and change function
-    resourcedObj['_orig'] = MD5.hex(JSON.stringify(resourcedObj));
-    resourcedObj['_changed'] = function (){ return changed(resourcedObj) };
+    attachChangeDetection(resourcedObj);
+
     return resourcedObj;
   }
 

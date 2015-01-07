@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   default_url_options :host => "localhost:3000"
 
-  resources :posts, only: [:index, :create, :show, :update] do
+  resources :posts do
     collection do
       put '/' => 'posts#update'
     end

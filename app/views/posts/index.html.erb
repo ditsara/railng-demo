@@ -9,28 +9,23 @@
       <th>title</th>
       <th>body</th>
       <th>changed?</th>
+      <th></th>
     </tr>
 
-    <tr
-     ng-repeat="post in posts"
-     ng-mouseenter="editing = true"
-     ng-mouseleave="editing = false" >
+    <tr ng-repeat="post in posts | filter:{}" >
 
       <td>{{post.id}}</td>
       <td>
-        <span ng-hide="editing">{{post.title}}</span>
-        <span ng-show="editing">
-          <input type="text" class="form-control" ng-model="post.title" />
-        </span>
+        <input type="text" class="form-control" ng-model="post.title" />
       </td>
       <td>
-        <span ng-hide="editing">{{post.body}}</span>
-        <span ng-show="editing">
-          <input type="text" class="form-control" ng-model="post.body" />
-        </span>
+        <input type="text" class="form-control" ng-model="post.body" />
       </td>
       <td>
-        <a href='#' ng-show="post._changed()" ng-click="post.$save()">Save</a>
+        <a href='#' ng-show="post._changed()" ng-click="post._update()">Save</a>
+      </td>
+      <td>
+        <a href='#' ng-click="post._delete()">Delete</a>
       </td>
     </tr>
 

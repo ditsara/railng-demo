@@ -21,7 +21,7 @@ class PostsController < ApplicationController
 
       respond_to do |format|
         if @post.save
-          format.json { render :show, status: :ok }
+          format.json { render json: @post, status: :ok }
         else
           format.json { render json: @post.errors, status: :unprocessable_entity }
         end
@@ -48,25 +48,31 @@ class PostsController < ApplicationController
     end
   end
 
+  def destroy
+    @post = Post.find(params[:id])
+    @post.destroy
+    render json: { deleted: true }, status: :ok
+  end
+
   private
 
-  def mass_create_update
-    @posts = posts_params.map do |params|
-      if ( params[:id] )
-        do_update(params)
-      else
-        do_create(params)
-      end
-    end
-
-    # make sure all are valid before save
-    if @posts.reduce {|memo, post| memo && post.valid? }
-      @posts.each {|post| post.save }
-      render :index
-    else
-      render json: ( @posts.map {|post| post.errors} ), status: :unprocessable_entity
-    end
-  end
+  # def mass_create_update
+  #   @posts = posts_params.map do |params|
+  #     if ( params[:id] )
+  #       do_update(params)
+  #     else
+  #       do_create(params)
+  #     end
+  #   end
+  #
+  #   # make sure all are valid before save
+  #   if @posts.reduce {|memo, post| memo && post.valid? }
+  #     @posts.each {|post| post.save }
+  #     render :index
+  #   else
+  #     render json: ( @posts.map {|post| post.errors} ), status: :unprocessable_entity
+  #   end
+  # end
 
   def do_create(params)
     Post.new(post_params)
