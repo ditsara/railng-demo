@@ -3,14 +3,14 @@ angular.module('sandbox')
 function ($scope, RailsData) {
   RailsData.$init();
 
-  $scope.posts = RailsData.posts.data
+  $scope.posts = RailsData.posts
   $scope.save = RailsData.posts.save;
   $scope.add = function () {
-    RailsData.posts.data.push({});
+    RailsData.posts.push({});
   };
 
   $scope.$watch('posts', function() {
-    $scope.changed = RailsData.posts.changed();
+    $scope.changed = RailsData.$changed(RailsData.posts); // ????
     // we could even make this auto-save the obj, probably with a
     // timed delay
 
@@ -27,6 +27,12 @@ angular.module('sandbox')
 .factory('RailsData', [ '$resource', function ($resource) {
   var railsData = {};
 
+  function withoutOrig(obj) {
+    return _.omit(obj, '_orig');
+  }
+
+  var MD5 = new Hashes.MD5;
+
   // generate a $resource if the obj has a url
   function toResource(railsObj) {
 
@@ -39,37 +45,36 @@ angular.module('sandbox')
     }
 
     if (typeof(railsObj.url) == 'undefined') {
+      railsObj['_orig'] = MD5.hex(JSON.stringify(railsObj));
       return railsObj;
     } else {
       // has a URL; generate a $resource object
-      var resourceObj = $resource(railsObj.url);
-      return new resourceObj(railsObj);
+      var resourceKlass = $resource(railsObj.url);
+      var resourceObj = new resourceKlass(railsObj);
+      resourceObj['_orig'] = MD5.hex(JSON.stringify(resourceObj));
+      return resourceObj;
     }
   }
 
-  var MD5 = new Hashes.MD5;
-
   var init = function() {
     angular.forEach(railsBindings, function(value, key) {
-      railsData[key] = {
-        data: toResource(value.data),
-
-        // stores the MD5 hash of the obj to detect changes later
-        original: MD5.hex( JSON.stringify( toResource(value.data) ) ),
-
-        // compares current obj with the MD5 hash
-        changed: function() {
-          return !( MD5.hex(JSON.stringify(railsData[key].data)) === railsData[key].original );
-        }
-
-        // we could generate other functions based on options pushed
-        // to the data array
-      };
-
+      railsData[key] = toResource(value);
     });
   };
+  var changed = function(obj) {
+    if (obj instanceof Array) {
+      return obj.some(
+        function(currentValue, index, array) {
+          return changed(currentValue);
+      });
+
+    } else {
+      return !(MD5.hex( JSON.stringify(withoutOrig(obj)) ) === obj._orig)
+    }
+  }
 
   railsData.$init = init;
+  railsData.$changed = changed;
 
   return railsData;
 }]);

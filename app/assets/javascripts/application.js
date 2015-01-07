@@ -15,6 +15,7 @@
 //= require angular
 //= require angular-resource
 //= require jshashes
+//= require underscore
 //= require_self
 //= require_tree .
 

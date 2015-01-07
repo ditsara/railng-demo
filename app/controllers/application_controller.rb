@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
 
   def js_bind(obj, name = nil, options = {})
     name ||= :obj
-    @js_bind[name] = { data: obj }.merge(options)
+    @js_bind[name] = obj
     return obj
   end
 
