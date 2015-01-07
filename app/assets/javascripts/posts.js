@@ -33,11 +33,14 @@ angular.module('sandbox')
 
   var MD5 = new Hashes.MD5;
 
-  // generate a $resource if the obj has a url
+  // adds a hash for change detection, and generates an
+  // AngularJS $resource instance if the obj has a 'url' property
+  // when called with an array, simply return an array with
+  // toResource called on each array member
   function toResource(railsObj) {
 
     if (railsObj instanceof Array) {
-      // recursion
+      // recursion!
       return railsObj.map(
         function(currentValue, index, array) {
           return toResource(currentValue);
@@ -45,10 +48,11 @@ angular.module('sandbox')
     }
 
     if (typeof(railsObj.url) == 'undefined') {
+      // no URL; just generate and attach the hash
       railsObj['_orig'] = MD5.hex(JSON.stringify(railsObj));
       return railsObj;
     } else {
-      // has a URL; generate a $resource object
+      // has a URL; generate a $resource object then attach the hash
       var resourceKlass = $resource(railsObj.url);
       var resourceObj = new resourceKlass(railsObj);
       resourceObj['_orig'] = MD5.hex(JSON.stringify(resourceObj));
@@ -56,11 +60,14 @@ angular.module('sandbox')
     }
   }
 
+  // picks up railsBindings and brings them into this Angular service
   var init = function() {
     angular.forEach(railsBindings, function(value, key) {
       railsData[key] = toResource(value);
     });
   };
+
+  // detects changes by comparing MD5 hashes
   var changed = function(obj) {
     if (obj instanceof Array) {
       return obj.some(
