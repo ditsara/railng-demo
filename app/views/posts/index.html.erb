@@ -8,6 +8,7 @@
       <th>id</th>
       <th>title</th>
       <th>body</th>
+      <th>changed?</th>
     </tr>
 
     <tr
@@ -28,7 +29,9 @@
           <input type="text" class="form-control" ng-model="post.body" />
         </span>
       </td>
-
+      <td>
+        <a href='#' ng-show="post._changed()" ng-click="post.$save()">Save</a>
+      </td>
     </tr>
 
   </table>
@@ -40,11 +43,6 @@
 
   <p>
     Changed: {{changed}}
-  </p>
-  <p>
-    <span ng-show="changed">
-      <a href='#' ng-click="save()">Save</a>
-    </span>
   </p>
 
 </div>
